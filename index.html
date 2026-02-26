@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hussein Allami — CrashSec</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0f;
+      --bg-card: #111118;
+      --bg-card-hover: #16161f;
+      --accent: #00e5a0;
+      --accent-dim: #00e5a020;
+      --accent-mid: #00e5a060;
+      --text: #e8e8ed;
+      --text-dim: #6b6b7b;
+      --text-mid: #9999ab;
+      --border: #1e1e2a;
+      --font-display: 'Syne', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-weight: 300;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* --- NOISE OVERLAY --- */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 200px;
+    }
+
+    /* --- GLOW ORB --- */
+    .glow-orb {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      top: -200px;
+      right: -200px;
+      animation: orbFloat 12s ease-in-out infinite;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-80px, 60px); }
+    }
+
+    /* --- NAV --- */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1.25rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(20px);
+      background: #0a0a0fcc;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+
+    .logo span { color: var(--text-dim); font-weight: 400; }
+
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+
+    .nav-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      transition: color 0.3s;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--accent);
+      transition: width 0.3s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* --- SECTIONS --- */
+    section {
+      position: relative;
+      z-index: 1;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .section-label::before {
+      content: '';
+      width: 30px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.15;
+      margin-bottom: 2rem;
+      letter-spacing: -1px;
+    }
+
+    /* --- HERO --- */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-top: 5rem;
+    }
+
+    .hero-intro {
+      font-size: 0.85rem;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.3s forwards;
+    }
+
+    .hero h1 {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(3rem, 7vw, 5.5rem);
+      line-height: 1.05;
+      letter-spacing: -2px;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.5s forwards;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--accent), #00b8d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--text-mid);
+      max-width: 520px;
+      line-height: 1.8;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.7s forwards;
+    }
+
+    .hero-cta {
+      margin-top: 2.5rem;
+      display: flex;
+      gap: 1rem;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.9s forwards;
+    }
+
+    .btn {
+      padding: 0.85rem 2rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+      font-weight: 500;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 30px var(--accent-mid);
+      transform: translateY(-2px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text-mid);
+      border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* --- ABOUT --- */
+    #about { padding-top: 8rem; padding-bottom: 6rem; }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+
+    .about-text p {
+      color: var(--text-mid);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+
+    .about-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 1.75rem;
+      transition: all 0.3s;
+    }
+
+    .stat-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-mid);
+      transform: translateY(-3px);
+    }
+
+    .stat-number {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 2rem;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* --- SKILLS --- */
+    #skills { padding-top: 4rem; padding-bottom: 6rem; }
+
+    .skills-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .skill-group {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      transition: all 0.4s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .skill-group::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 0;
+      background: var(--accent);
+      transition: height 0.4s;
+    }
+
+    .skill-group:hover::before { height: 100%; }
+
+    .skill-group:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-dim);
+    }
+
+    .skill-group h3 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .skill-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .skill-tag {
+      padding: 0.4rem 0.85rem;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      border: 1px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .skill-tag:hover {
+      border-color: var(--accent);
+      background: transparent;
+    }
+
+    /* --- EXPERIENCE --- */
+    #experience { padding-top: 4rem; padding-bottom: 6rem; }
+
+    .timeline { position: relative; margin-top: 1rem; }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--accent), var(--border));
+    }
+
+    .timeline-item {
+      padding-left: 2.5rem;
+      padding-bottom: 3rem;
+      position: relative;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -4px;
+      top: 6px;
+      width: 9px;
+      height: 9px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--accent-mid);
+    }
+
+    .timeline-date {
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-role {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .timeline-company {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-bottom: 0.75rem;
+    }
+
+    .timeline-desc {
+      font-size: 0.9rem;
+      color: var(--text-mid);
+      line-height: 1.7;
+    }
+
+    /* --- CONTACT --- */
+    #contact { padding-top: 4rem; padding-bottom: 8rem; }
+
+    .contact-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 3.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 3rem;
+      transition: border-color 0.3s;
+    }
+
+    .contact-box:hover { border-color: var(--accent-dim); }
+
+    .contact-info h3 {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .contact-info p {
+      color: var(--text-mid);
+      font-size: 0.9rem;
+    }
+
+    .contact-email {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 400;
+      padding: 1rem 2rem;
+      border: 1px solid var(--accent-mid);
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .contact-email:hover {
+      background: var(--accent);
+      color: var(--bg);
+      box-shadow: 0 0 30px var(--accent-mid);
+    }
+
+    .contact-email svg { width: 18px; height: 18px; fill: currentColor; }
+
+    /* --- FOOTER --- */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+    }
+
+    /* --- ANIMATIONS --- */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(25px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { gap: 1rem; }
+      .nav-links a { font-size: 0.7rem; }
+      section { padding: 0 1.25rem; }
+      .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .skills-container { grid-template-columns: 1fr; }
+      .contact-box { flex-direction: column; padding: 2.5rem; text-align: center; }
+      .hero-cta { flex-direction: column; }
+      .btn { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="glow-orb"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">Crash<span>Sec</span></div>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="hero-intro">// Hussein Allami — aka CrashSec</p>
+    <h1>Building the<br><span class="highlight">future, securely.</span></h1>
+    <p class="hero-desc">
+      Cybersecurity Engineer & Security Awareness Consultant with 10+ years of experience in information security management, penetration testing, and incident response.
+    </p>
+    <div class="hero-cta">
+      <a href="#contact" class="btn btn-primary">Get in touch</a>
+      <a href="#experience" class="btn btn-outline">View experience</a>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="reveal">
+      <p class="section-label">01 — About</p>
+      <h2 class="section-title">Who I am</h2>
+    </div>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p>
+          I'm Hussein Allami, known in the security community as CrashSec. A Cybersecurity Engineer with over a decade of experience spanning information security management, penetration testing, and security awareness consulting.
+        </p>
+        <p>
+          My career began securing critical infrastructure at Alkafeel.net and evolved into leading offensive security efforts at the Iraqi National CERT. I've dedicated my career to strengthening security posture across organizations and empowering teams through awareness and education.
+        </p>
+        <p>
+          I bring a deep technical foundation paired with strategic leadership — from hands-on red teaming to advising organizations on building a security-first culture.
+        </p>
+      </div>
+      <div class="about-stats reveal">
+        <div class="stat-card">
+          <div class="stat-number">15+</div>
+          <div class="stat-label">Years Experience</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">50+</div>
+          <div class="stat-label">Projects Completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">20+</div>
+          <div class="stat-label">CTFs Competed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">∞</div>
+          <div class="stat-label">Curiosity</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="reveal">
+      <p class="section-label">02 — Skills</p>
+      <h2 class="section-title">What I work with</h2>
+    </div>
+    <div class="skills-container">
+      <div class="skill-group reveal">
+        <h3>Offensive Security</h3>
+        <div class="skill-tags">
+          <span class="skill-tag">Penetration Testing</span>
+          <span class="skill-tag">Red Teaming</span>
+          <span class="skill-tag">Exploit Dev</span>
+          <span class="skill-tag">Reverse Engineering</span>
+          <span class="skill-tag">OSINT</span>
+        </div>
+      </div>
+      <div class="skill-group reveal">
+        <h3>Languages & Scripting</h3>
+        <div class="skill-tags">
+          <span class="skill-tag">Python</span>
+          <span class="skill-tag">Bash</span>
+          <span class="skill-tag">Go</span>
+          <span class="skill-tag">C / C++</span>
+          <span class="skill-tag">JavaScript</span>
+        </div>
+      </div>
+      <div class="skill-group reveal">
+        <h3>Infrastructure & Cloud</h3>
+        <div class="skill-tags">
+          <span class="skill-tag">Linux</span>
+          <span class="skill-tag">Docker</span>
+          <span class="skill-tag">AWS</span>
+          <span class="skill-tag">Kubernetes</span>
+          <span class="skill-tag">Terraform</span>
+        </div>
+      </div>
+      <div class="skill-group reveal">
+        <h3>Tools & Platforms</h3>
+        <div class="skill-tags">
+          <span class="skill-tag">Burp Suite</span>
+          <span class="skill-tag">Metasploit</span>
+          <span class="skill-tag">Ghidra</span>
+          <span class="skill-tag">Wireshark</span>
+          <span class="skill-tag">Nmap</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <div class="reveal">
+      <p class="section-label">03 — Experience</p>
+      <h2 class="section-title">Where I've been</h2>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item reveal">
+        <p class="timeline-date">Ongoing</p>
+        <h3 class="timeline-role">Security Awareness Consultant</h3>
+        <p class="timeline-company">Law Enforcement, Government & Private Sector</p>
+        <p class="timeline-desc">
+          Advising law enforcement agencies, government security teams, and organizations on building security-first cultures through tailored awareness programs, phishing simulations, policy development, and executive-level security training.
+        </p>
+      </div>
+      <div class="timeline-item reveal">
+        <p class="timeline-date">2016 — 2023</p>
+        <h3 class="timeline-role">Senior Penetration Tester</h3>
+        <p class="timeline-company">Iraqi National CERT</p>
+        <p class="timeline-desc">
+          Leading offensive security assessments, conducting red team operations, and coordinating vulnerability disclosure for critical national infrastructure and government systems.
+        </p>
+      </div>
+      <div class="timeline-item reveal">
+        <p class="timeline-date">2023 — Present</p>
+        <h3 class="timeline-role">CERT Director</h3>
+        <p class="timeline-company">Confidential</p>
+        <p class="timeline-desc">
+          Directing a Computer Emergency Response Team, overseeing incident response operations, threat intelligence, and security strategy for a high-security environment.
+        </p>
+      </div>
+      <div class="timeline-item reveal">
+        <p class="timeline-date">2010 — 2016</p>
+        <h3 class="timeline-role">Information Security Manager</h3>
+        <p class="timeline-company">Alkafeel.net</p>
+        <p class="timeline-desc">
+          Managed the organization's information security program, implemented security policies and controls, oversaw incident response operations, and led vulnerability management initiatives.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="reveal">
+      <p class="section-label">04 — Contact</p>
+      <h2 class="section-title">Let's connect</h2>
+    </div>
+    <div class="contact-box reveal">
+      <div class="contact-info">
+        <h3>Have a project in mind?</h3>
+        <p>I'm always open to discussing new opportunities, collaborations, or just geeking out about security.</p>
+      </div>
+      <a href="mailto:root@crashsec.me" class="contact-email">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        root@crashsec.me
+      </a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 Hussein Allami — CrashSec. All rights reserved.</p>
+  </footer>
+
+  <!-- SCROLL REVEAL -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 100);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
