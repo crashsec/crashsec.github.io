@@ -498,17 +498,85 @@
       transform: translateY(0);
     }
 
+    /* --- HAMBURGER --- */
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      flex-direction: column;
+      gap: 5px;
+      padding: 0.5rem;
+      z-index: 200;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--text);
+      transition: all 0.3s;
+    }
+
+    nav.open .hamburger span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+    nav.open .hamburger span:nth-child(2) { opacity: 0; }
+    nav.open .hamburger span:nth-child(3) {
+      transform: rotate(-45deg) translate(5px, -5px);
+    }
+
     /* --- RESPONSIVE --- */
     @media (max-width: 768px) {
       nav { padding: 1rem 1.5rem; }
-      .nav-links { gap: 1rem; }
-      .nav-links a { font-size: 0.7rem; }
+
+      .hamburger { display: flex; }
+
+      .nav-links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 70%;
+        max-width: 280px;
+        height: 100vh;
+        background: var(--bg-card);
+        border-left: 1px solid var(--border);
+        flex-direction: column;
+        padding: 5rem 2rem 2rem;
+        gap: 1.5rem;
+        transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 150;
+      }
+
+      nav.open .nav-links { right: 0; }
+
+      .nav-links a { font-size: 0.9rem; }
+
       section { padding: 0 1.25rem; }
+      .hero { padding-top: 6rem; min-height: auto; padding-bottom: 4rem; }
+      .hero h1 { font-size: clamp(2.2rem, 10vw, 3.5rem); }
+      .hero-desc { font-size: 0.9rem; }
       .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .about-stats { grid-template-columns: 1fr 1fr; }
       .skills-container { grid-template-columns: 1fr; }
-      .contact-box { flex-direction: column; padding: 2.5rem; text-align: center; }
+      .section-title { font-size: clamp(1.6rem, 5vw, 2.5rem); }
+      .contact-box {
+        flex-direction: column;
+        padding: 2rem 1.5rem;
+        text-align: center;
+      }
+      .contact-email { font-size: 0.9rem; padding: 0.85rem 1.5rem; }
       .hero-cta { flex-direction: column; }
       .btn { text-align: center; }
+      .stat-card { padding: 1.25rem; }
+      .stat-number { font-size: 1.6rem; }
+      .timeline-role { font-size: 1.1rem; }
+    }
+
+    @media (max-width: 380px) {
+      .hero h1 { font-size: 2rem; }
+      .about-stats { grid-template-columns: 1fr; }
+      .contact-email { font-size: 0.8rem; }
     }
   </style>
 </head>
@@ -519,6 +587,9 @@
   <!-- NAV -->
   <nav>
     <div class="logo">Crash<span>Sec</span></div>
+    <button class="hamburger" onclick="document.querySelector('nav').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
     <ul class="nav-links">
       <li><a href="#about">About</a></li>
       <li><a href="#skills">Skills</a></li>
@@ -706,6 +777,13 @@
     }, { threshold: 0.15 });
 
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Close mobile menu on link click
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => {
+        document.querySelector('nav').classList.remove('open');
+      });
+    });
   </script>
 
 </body>
