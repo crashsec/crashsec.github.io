@@ -29,6 +29,12 @@
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+    @property --beam-angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+
     :root {
       --bg: #0a0e14;
       --bg-card: #0f141c;
@@ -99,20 +105,28 @@
       background-size: 200px;
     }
 
-    /* --- GRID BACKDROP --- */
-    body::after {
-      content: '';
+    /* --- PARTICLE NETWORK --- */
+    #net {
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      background-image:
-        linear-gradient(var(--border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--border) 1px, transparent 1px);
-      background-size: 64px 64px;
-      opacity: 0.3;
-      -webkit-mask-image: radial-gradient(ellipse 90% 65% at 50% 0%, #000 0%, transparent 75%);
-      mask-image: radial-gradient(ellipse 90% 65% at 50% 0%, #000 0%, transparent 75%);
+    }
+
+    /* --- CURSOR GLOW --- */
+    .cursor-glow {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #00c8ff10 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 1;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      transition: opacity 0.6s;
     }
 
     /* --- GLOW ORBS --- */
@@ -186,6 +200,16 @@
 
     .logo span { color: var(--text-dim); font-weight: 400; }
 
+    .logo:hover {
+      animation: glitch 0.4s steps(2) infinite;
+    }
+
+    @keyframes glitch {
+      0% { text-shadow: 2px 0 #00e5a0aa, -2px 0 #00c8ffaa; }
+      50% { text-shadow: -2px 0 #00e5a0aa, 2px 0 #00c8ffaa; }
+      100% { text-shadow: 1px 0 #00e5a0aa, -1px 0 #00c8ffaa; }
+    }
+
     .nav-links { display: flex; gap: 2rem; list-style: none; }
 
     .nav-links a {
@@ -230,7 +254,7 @@
     /* --- SECTIONS --- */
     section {
       position: relative;
-      z-index: 1;
+      z-index: 2;
       max-width: 1060px;
       margin: 0 auto;
       padding: 0 2rem;
@@ -263,6 +287,7 @@
       line-height: 1.15;
       margin-bottom: 2rem;
       letter-spacing: -1px;
+      min-height: 1.15em;
     }
 
     /* --- HERO --- */
@@ -282,6 +307,45 @@
       width: 100%;
     }
 
+    .hero-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent-2);
+      border: 1px solid #00e5a030;
+      background: #00e5a00d;
+      padding: 0.45rem 1rem;
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.1s forwards;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-2);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .pulse-dot::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: inherit;
+      animation: pulse 2s ease-out infinite;
+    }
+
+    @keyframes pulse {
+      to { transform: scale(3.2); opacity: 0; }
+    }
+
     .hero-intro {
       font-size: 0.85rem;
       color: var(--accent);
@@ -289,7 +353,7 @@
       text-transform: uppercase;
       margin-bottom: 1.5rem;
       opacity: 0;
-      animation: fadeUp 0.8s 0.2s forwards;
+      animation: fadeUp 0.8s 0.25s forwards;
     }
 
     .hero h1 {
@@ -310,6 +374,8 @@
       background-clip: text;
     }
 
+    .scramble-char { color: var(--text-dim); }
+
     .hero-desc {
       font-size: 1.05rem;
       color: var(--text-mid);
@@ -328,6 +394,7 @@
     }
 
     .btn {
+      display: inline-block;
       padding: 0.85rem 2rem;
       font-family: var(--font-mono);
       font-size: 0.8rem;
@@ -336,7 +403,8 @@
       text-decoration: none;
       border: none;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: box-shadow 0.3s, color 0.3s, border-color 0.3s, background 0.3s;
+      will-change: transform;
     }
 
     .btn-primary {
@@ -346,10 +414,7 @@
       clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
     }
 
-    .btn-primary:hover {
-      box-shadow: 0 0 30px var(--accent-mid);
-      transform: translateY(-2px);
-    }
+    .btn-primary:hover { box-shadow: 0 0 30px var(--accent-mid); }
 
     .btn-outline {
       background: transparent;
@@ -419,8 +484,50 @@
 
     @keyframes blink { 50% { opacity: 0; } }
 
+    /* --- TICKER --- */
+    .ticker {
+      position: relative;
+      z-index: 2;
+      overflow: hidden;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: #0c111a99;
+      padding: 1.1rem 0;
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    }
+
+    .ticker-track {
+      display: flex;
+      width: max-content;
+      animation: tickerScroll 36s linear infinite;
+    }
+
+    .ticker:hover .ticker-track { animation-play-state: paused; }
+
+    @keyframes tickerScroll {
+      to { transform: translateX(-50%); }
+    }
+
+    .ticker-track span {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.72rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    .ticker-track span::after {
+      content: '◆';
+      color: var(--accent);
+      font-size: 0.55rem;
+      margin: 0 2.2rem;
+    }
+
     /* --- ABOUT --- */
-    #about { padding-top: 8rem; padding-bottom: 6rem; }
+    #about { padding-top: 7rem; padding-bottom: 6rem; }
 
     .about-grid {
       display: grid;
@@ -445,8 +552,9 @@
       background: var(--bg-card);
       border: 1px solid var(--border);
       padding: 1.75rem;
-      transition: all 0.3s;
+      transition: background 0.3s, border-color 0.3s, transform 0.2s ease-out;
       position: relative;
+      transform-style: preserve-3d;
     }
 
     .stat-card::after {
@@ -465,7 +573,6 @@
     .stat-card:hover {
       background: var(--bg-card-hover);
       border-color: var(--accent-mid);
-      transform: translateY(-3px);
     }
 
     .stat-card:hover::after { opacity: 1; }
@@ -501,9 +608,10 @@
       background: var(--bg-card);
       border: 1px solid var(--border);
       padding: 2rem;
-      transition: all 0.4s;
+      transition: background 0.4s, border-color 0.4s, transform 0.2s ease-out;
       position: relative;
       overflow: hidden;
+      transform-style: preserve-3d;
     }
 
     .skill-group::before {
@@ -634,22 +742,26 @@
       align-items: center;
       gap: 2rem;
       flex-wrap: wrap;
-      transition: border-color 0.3s;
       position: relative;
-      overflow: hidden;
     }
 
-    .contact-box::before {
+    .contact-box::after {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2), transparent);
+      inset: -1px;
+      padding: 1px;
+      background: conic-gradient(from var(--beam-angle), transparent 0%, transparent 72%, var(--accent), var(--accent-2), transparent 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+      animation: beamSpin 6s linear infinite;
+      pointer-events: none;
     }
 
-    .contact-box:hover { border-color: var(--accent-dim); }
+    @keyframes beamSpin {
+      to { --beam-angle: 360deg; }
+    }
 
     .contact-info h3 {
       font-family: var(--font-display);
@@ -681,9 +793,10 @@
       font-weight: 400;
       padding: 1rem 2rem;
       border: 1px solid var(--accent-mid);
-      transition: all 0.3s;
+      transition: background 0.3s, color 0.3s, box-shadow 0.3s;
       white-space: nowrap;
       min-width: 220px;
+      will-change: transform;
     }
 
     .contact-email:hover {
@@ -697,7 +810,7 @@
     /* --- FOOTER --- */
     footer {
       position: relative;
-      z-index: 1;
+      z-index: 2;
       text-align: center;
       padding: 2rem;
       border-top: 1px solid var(--border);
@@ -751,7 +864,7 @@
     .reveal {
       opacity: 0;
       transform: translateY(30px);
-      transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .reveal.visible {
@@ -766,7 +879,9 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
-      .hero-intro, .hero h1, .hero-desc, .hero-cta, .terminal, .reveal { opacity: 1; transform: none; }
+      .hero-status, .hero-intro, .hero h1, .hero-desc, .hero-cta, .terminal, .reveal { opacity: 1; transform: none; }
+      .ticker-track { animation: none; }
+      #net, .cursor-glow { display: none; }
     }
 
     /* --- HAMBURGER --- */
@@ -850,6 +965,7 @@
       .stat-number { font-size: 1.6rem; }
       .timeline-role { font-size: 1.1rem; }
       .to-top { right: 1rem; bottom: 1rem; }
+      .cursor-glow { display: none; }
     }
 
     @media (max-width: 380px) {
@@ -863,6 +979,8 @@
 
   <a href="#about" class="skip-link">Skip to content</a>
 
+  <canvas id="net" aria-hidden="true"></canvas>
+  <div class="cursor-glow" aria-hidden="true"></div>
   <div class="glow-orb"></div>
   <div class="glow-orb glow-orb--2"></div>
   <div class="scroll-progress"></div>
@@ -886,14 +1004,15 @@
   <section class="hero" id="top">
     <div class="hero-grid">
       <div>
+        <p class="hero-status"><span class="pulse-dot"></span> Open to opportunities</p>
         <p class="hero-intro">// Hussein Allami — aka CrashSec</p>
-        <h1>Building the<br><span class="highlight">future, securely.</span></h1>
+        <h1><span class="scramble" data-text="Building the">Building the</span><br><span class="highlight">future, securely.</span></h1>
         <p class="hero-desc">
           Cybersecurity Engineer & Security Awareness Consultant with 15+ years of experience in information security management, penetration testing, and incident response.
         </p>
         <div class="hero-cta">
-          <a href="#contact" class="btn btn-primary">Get in touch</a>
-          <a href="#experience" class="btn btn-outline">View experience</a>
+          <a href="#contact" class="btn btn-primary" data-magnetic>Get in touch</a>
+          <a href="#experience" class="btn btn-outline" data-magnetic>View experience</a>
         </div>
       </div>
       <div class="terminal" aria-hidden="true">
@@ -908,11 +1027,18 @@
     </div>
   </section>
 
+  <!-- TICKER -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track" id="ticker-track">
+      <span>Penetration Testing</span><span>Red Teaming</span><span>Incident Response</span><span>Threat Intelligence</span><span>OSINT</span><span>Security Awareness</span><span>Reverse Engineering</span><span>Exploit Development</span>
+    </div>
+  </div>
+
   <!-- ABOUT -->
   <section id="about">
     <div class="reveal">
       <p class="section-label">01 — About</p>
-      <h2 class="section-title">Who I am</h2>
+      <h2 class="section-title scramble" data-text="Who I am">Who I am</h2>
     </div>
     <div class="about-grid">
       <div class="about-text reveal">
@@ -927,19 +1053,19 @@
         </p>
       </div>
       <div class="about-stats reveal">
-        <div class="stat-card">
+        <div class="stat-card" data-tilt>
           <div class="stat-number" data-count="15" data-suffix="+">15+</div>
           <div class="stat-label">Years Experience</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" data-tilt>
           <div class="stat-number" data-count="50" data-suffix="+">50+</div>
           <div class="stat-label">Projects Completed</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" data-tilt>
           <div class="stat-number" data-count="20" data-suffix="+">20+</div>
           <div class="stat-label">CTFs Competed</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" data-tilt>
           <div class="stat-number">∞</div>
           <div class="stat-label">Curiosity</div>
         </div>
@@ -951,10 +1077,10 @@
   <section id="skills">
     <div class="reveal">
       <p class="section-label">02 — Skills</p>
-      <h2 class="section-title">What I work with</h2>
+      <h2 class="section-title scramble" data-text="What I work with">What I work with</h2>
     </div>
     <div class="skills-container">
-      <div class="skill-group reveal">
+      <div class="skill-group reveal" data-tilt>
         <h3>Offensive Security</h3>
         <div class="skill-tags">
           <span class="skill-tag">Penetration Testing</span>
@@ -964,7 +1090,7 @@
           <span class="skill-tag">OSINT</span>
         </div>
       </div>
-      <div class="skill-group reveal">
+      <div class="skill-group reveal" data-tilt>
         <h3>Languages & Scripting</h3>
         <div class="skill-tags">
           <span class="skill-tag">Python</span>
@@ -974,7 +1100,7 @@
           <span class="skill-tag">JavaScript</span>
         </div>
       </div>
-      <div class="skill-group reveal">
+      <div class="skill-group reveal" data-tilt>
         <h3>Infrastructure & Cloud</h3>
         <div class="skill-tags">
           <span class="skill-tag">Linux</span>
@@ -984,7 +1110,7 @@
           <span class="skill-tag">Terraform</span>
         </div>
       </div>
-      <div class="skill-group reveal">
+      <div class="skill-group reveal" data-tilt>
         <h3>Tools & Platforms</h3>
         <div class="skill-tags">
           <span class="skill-tag">Burp Suite</span>
@@ -1001,7 +1127,7 @@
   <section id="experience">
     <div class="reveal">
       <p class="section-label">03 — Experience</p>
-      <h2 class="section-title">Where I've been</h2>
+      <h2 class="section-title scramble" data-text="Where I've been">Where I've been</h2>
     </div>
     <div class="timeline">
       <div class="timeline-item reveal">
@@ -1043,7 +1169,7 @@
   <section id="contact">
     <div class="reveal">
       <p class="section-label">04 — Contact</p>
-      <h2 class="section-title">Let's connect</h2>
+      <h2 class="section-title scramble" data-text="Let's connect">Let's connect</h2>
     </div>
     <div class="contact-box reveal">
       <div class="contact-info">
@@ -1051,11 +1177,11 @@
         <p>I'm always open to discussing new opportunities, collaborations, or just geeking out about security.</p>
       </div>
       <div class="contact-links">
-        <a href="mailto:root@crashsec.me" class="contact-email">
+        <a href="mailto:root@crashsec.me" class="contact-email" data-magnetic>
           <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
           root@crashsec.me
         </a>
-        <a href="https://www.linkedin.com/in/crashsec" target="_blank" rel="noopener noreferrer" class="contact-email">
+        <a href="https://www.linkedin.com/in/crashsec" target="_blank" rel="noopener noreferrer" class="contact-email" data-magnetic>
           <svg viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
           LinkedIn
         </a>
@@ -1074,8 +1200,9 @@
   <!-- SCRIPTS -->
   <script>
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const finePointer = window.matchMedia('(pointer: fine)').matches;
 
-    // Scroll reveal
+    /* ---------- Scroll reveal ---------- */
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry, i) => {
         if (entry.isIntersecting) {
@@ -1087,7 +1214,7 @@
 
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    // Mobile menu
+    /* ---------- Mobile menu ---------- */
     const nav = document.querySelector('nav');
     const hamburger = document.querySelector('.hamburger');
     const backdrop = document.querySelector('.nav-backdrop');
@@ -1106,7 +1233,7 @@
       link.addEventListener('click', () => setMenu(false));
     });
 
-    // Scroll progress + nav shadow + back-to-top
+    /* ---------- Scroll progress / nav shadow / back-to-top ---------- */
     const progressBar = document.querySelector('.scroll-progress');
     const toTop = document.querySelector('.to-top');
 
@@ -1120,7 +1247,7 @@
 
     toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' }));
 
-    // Highlight the nav link for the section in view
+    /* ---------- Scrollspy ---------- */
     const navAnchors = document.querySelectorAll('.nav-links a');
     const spy = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -1134,7 +1261,165 @@
 
     document.querySelectorAll('section[id]:not(#top)').forEach(s => spy.observe(s));
 
-    // Terminal typing animation
+    /* ---------- Particle network ---------- */
+    (function particles() {
+      if (reducedMotion) return;
+      const canvas = document.getElementById('net');
+      const ctx = canvas.getContext('2d');
+      const mouse = { x: -9999, y: -9999 };
+      let W, H, nodes, raf;
+
+      function init() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+        const count = Math.min(finePointer ? 80 : 35, Math.floor(W * H / 22000));
+        nodes = Array.from({ length: count }, () => ({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.5) * 0.4,
+          r: Math.random() * 1.4 + 0.6
+        }));
+      }
+
+      function step() {
+        ctx.clearRect(0, 0, W, H);
+        const linkDist = 130;
+        for (const n of nodes) {
+          n.x += n.vx; n.y += n.vy;
+          if (n.x < 0 || n.x > W) n.vx *= -1;
+          if (n.y < 0 || n.y > H) n.vy *= -1;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0, 200, 255, 0.45)';
+          ctx.fill();
+        }
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+            const d = Math.hypot(dx, dy);
+            if (d < linkDist) {
+              ctx.beginPath();
+              ctx.moveTo(nodes[i].x, nodes[i].y);
+              ctx.lineTo(nodes[j].x, nodes[j].y);
+              ctx.strokeStyle = `rgba(0, 200, 255, ${(1 - d / linkDist) * 0.14})`;
+              ctx.stroke();
+            }
+          }
+          const md = Math.hypot(nodes[i].x - mouse.x, nodes[i].y - mouse.y);
+          if (md < 170) {
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(mouse.x, mouse.y);
+            ctx.strokeStyle = `rgba(0, 229, 160, ${(1 - md / 170) * 0.25})`;
+            ctx.stroke();
+          }
+        }
+        raf = requestAnimationFrame(step);
+      }
+
+      window.addEventListener('resize', () => { cancelAnimationFrame(raf); init(); step(); });
+      window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
+      window.addEventListener('mouseout', () => { mouse.x = -9999; mouse.y = -9999; });
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) cancelAnimationFrame(raf);
+        else { cancelAnimationFrame(raf); step(); }
+      });
+
+      init();
+      step();
+    })();
+
+    /* ---------- Cursor glow ---------- */
+    (function cursorGlow() {
+      if (reducedMotion || !finePointer) return;
+      const glow = document.querySelector('.cursor-glow');
+      let tx = 0, ty = 0, x = 0, y = 0, shown = false;
+      window.addEventListener('mousemove', e => {
+        tx = e.clientX; ty = e.clientY;
+        if (!shown) { glow.style.opacity = '1'; shown = true; }
+      }, { passive: true });
+      (function loop() {
+        x += (tx - x) * 0.08;
+        y += (ty - y) * 0.08;
+        glow.style.transform = `translate(${x - 300}px, ${y - 300}px)`;
+        requestAnimationFrame(loop);
+      })();
+    })();
+
+    /* ---------- Text scramble (decrypt) effect ---------- */
+    const SCRAMBLE_CHARS = '!-_\\/[]{}=+*^?#$%&';
+
+    function scrambleIn(el) {
+      const text = el.dataset.text || el.textContent;
+      if (reducedMotion) { el.textContent = text; return; }
+      const queue = [];
+      for (let i = 0; i < text.length; i++) {
+        const start = Math.floor(Math.random() * 16);
+        queue.push({ to: text[i], start, end: start + 12 + Math.floor(Math.random() * 14), char: '' });
+      }
+      let frame = 0, rafId;
+      function update() {
+        let out = '', done = 0;
+        for (const q of queue) {
+          if (frame >= q.end) { done++; out += q.to; }
+          else if (frame >= q.start) {
+            if (!q.char || Math.random() < 0.28) q.char = SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+            out += `<span class="scramble-char">${q.char}</span>`;
+          } else out += q.to;
+        }
+        el.innerHTML = out;
+        if (done < queue.length) { frame++; rafId = requestAnimationFrame(update); }
+        else el.textContent = text;
+      }
+      update();
+    }
+
+    const scrambleObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          scrambleObserver.unobserve(entry.target);
+          scrambleIn(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+
+    document.querySelectorAll('.scramble').forEach(el => {
+      el.dataset.text = el.dataset.text || el.textContent;
+      scrambleObserver.observe(el);
+    });
+
+    /* ---------- 3D tilt cards ---------- */
+    if (finePointer && !reducedMotion) {
+      document.querySelectorAll('[data-tilt]').forEach(card => {
+        card.addEventListener('mousemove', e => {
+          const r = card.getBoundingClientRect();
+          const rx = -((e.clientY - r.top) / r.height - 0.5) * 7;
+          const ry = ((e.clientX - r.left) / r.width - 0.5) * 7;
+          card.style.transform = `perspective(700px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-2px)`;
+        });
+        card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+      });
+    }
+
+    /* ---------- Magnetic buttons ---------- */
+    if (finePointer && !reducedMotion) {
+      document.querySelectorAll('[data-magnetic]').forEach(btn => {
+        btn.addEventListener('mousemove', e => {
+          const r = btn.getBoundingClientRect();
+          const x = e.clientX - r.left - r.width / 2;
+          const y = e.clientY - r.top - r.height / 2;
+          btn.style.transform = `translate(${x * 0.18}px, ${y * 0.18}px)`;
+        });
+        btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+      });
+    }
+
+    /* ---------- Ticker (duplicate content for seamless loop) ---------- */
+    const tickerTrack = document.getElementById('ticker-track');
+    tickerTrack.innerHTML += tickerTrack.innerHTML;
+
+    /* ---------- Terminal typing ---------- */
     const termBody = document.getElementById('term-body');
     const termScript = [
       { cmd: 'whoami', out: ['hussein.allami — aka CrashSec'] },
@@ -1183,7 +1468,7 @@
 
     runTerminal();
 
-    // Stat counters
+    /* ---------- Stat counters ---------- */
     const statObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (!entry.isIntersecting) return;
@@ -1206,7 +1491,7 @@
 
     document.querySelectorAll('.stat-number[data-count]').forEach(el => statObserver.observe(el));
 
-    // For the curious
+    /* ---------- For the curious ---------- */
     console.log('%c> Hello, fellow hacker. The interesting stuff is offline — root@crashsec.me', 'color:#00c8ff;font-family:monospace;font-size:13px');
   </script>
 
