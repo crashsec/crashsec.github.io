@@ -4,7 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hussein Allami — CrashSec</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <meta name="description" content="Hussein Allami (CrashSec) — Cybersecurity Engineer & Security Awareness Consultant with 15+ years across penetration testing, incident response, and security leadership.">
+  <meta name="theme-color" content="#0a0a0f">
+  <meta property="og:title" content="Hussein Allami — CrashSec">
+  <meta property="og:description" content="Cybersecurity Engineer & Security Awareness Consultant — penetration testing, incident response, and security awareness.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://crashsec.me/">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%230a0a0f'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='%2300e5a0' font-family='monospace'%3E%3E_%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -13,6 +22,7 @@
       --bg-card: #111118;
       --bg-card-hover: #16161f;
       --accent: #00e5a0;
+      --accent-2: #00b8d4;
       --accent-dim: #00e5a020;
       --accent-mid: #00e5a060;
       --text: #e8e8ed;
@@ -20,16 +30,18 @@
       --text-mid: #9999ab;
       --border: #1e1e2a;
       --font-display: 'Orbitron', sans-serif;
-      --font-mono: 'Share Tech Mono', monospace;
+      --font-mono: 'JetBrains Mono', monospace;
     }
 
     html { scroll-behavior: smooth; }
+
+    ::selection { background: var(--accent); color: var(--bg); }
 
     body {
       background: var(--bg);
       color: var(--text);
       font-family: var(--font-mono);
-      font-weight: 300;
+      font-weight: 400;
       line-height: 1.7;
       overflow-x: hidden;
     }
@@ -47,7 +59,23 @@
       background-size: 200px;
     }
 
-    /* --- GLOW ORB --- */
+    /* --- GRID BACKDROP --- */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 64px 64px;
+      opacity: 0.3;
+      -webkit-mask-image: radial-gradient(ellipse 90% 65% at 50% 0%, #000 0%, transparent 75%);
+      mask-image: radial-gradient(ellipse 90% 65% at 50% 0%, #000 0%, transparent 75%);
+    }
+
+    /* --- GLOW ORBS --- */
     .glow-orb {
       position: fixed;
       width: 600px;
@@ -61,9 +89,31 @@
       animation: orbFloat 12s ease-in-out infinite;
     }
 
+    .glow-orb--2 {
+      top: auto;
+      right: auto;
+      bottom: -250px;
+      left: -250px;
+      background: radial-gradient(circle, #00b8d418 0%, transparent 70%);
+      animation-duration: 16s;
+      animation-direction: reverse;
+    }
+
     @keyframes orbFloat {
       0%, 100% { transform: translate(0, 0); }
       50% { transform: translate(-80px, 60px); }
+    }
+
+    /* --- SCROLL PROGRESS --- */
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      width: 0;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      z-index: 101;
+      pointer-events: none;
     }
 
     /* --- NAV --- */
@@ -80,7 +130,10 @@
       backdrop-filter: blur(20px);
       background: #0a0a0fcc;
       border-bottom: 1px solid var(--border);
+      transition: box-shadow 0.3s;
     }
+
+    nav.scrolled { box-shadow: 0 10px 30px -15px #000; }
 
     .logo {
       font-family: var(--font-display);
@@ -115,8 +168,10 @@
       transition: width 0.3s;
     }
 
-    .nav-links a:hover { color: var(--accent); }
-    .nav-links a:hover::after { width: 100%; }
+    .nav-links a:hover,
+    .nav-links a.active { color: var(--accent); }
+    .nav-links a:hover::after,
+    .nav-links a.active::after { width: 100%; }
 
     /* --- SECTIONS --- */
     section {
@@ -126,6 +181,8 @@
       margin: 0 auto;
       padding: 0 2rem;
     }
+
+    section[id] { scroll-margin-top: 5rem; }
 
     .section-label {
       font-size: 0.7rem;
@@ -173,6 +230,14 @@
       animation: fadeUp 0.8s 0.3s forwards;
     }
 
+    .hero-intro::after {
+      content: '_';
+      margin-left: 2px;
+      animation: blink 1.1s steps(2, start) infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+
     .hero h1 {
       font-family: var(--font-display);
       font-weight: 800;
@@ -185,16 +250,16 @@
     }
 
     .hero h1 .highlight {
-      background: linear-gradient(135deg, var(--accent), #00b8d4);
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
 
     .hero-desc {
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       color: var(--text-mid);
-      max-width: 520px;
+      max-width: 540px;
       line-height: 1.8;
       opacity: 0;
       animation: fadeUp 0.8s 0.7s forwards;
@@ -224,6 +289,7 @@
       background: var(--accent);
       color: var(--bg);
       font-weight: 500;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
     }
 
     .btn-primary:hover {
@@ -255,7 +321,7 @@
     .about-text p {
       color: var(--text-mid);
       margin-bottom: 1.25rem;
-      font-size: 1.15rem;
+      font-size: 1.05rem;
     }
 
     .about-stats {
@@ -269,6 +335,20 @@
       border: 1px solid var(--border);
       padding: 1.75rem;
       transition: all 0.3s;
+      position: relative;
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: -1px;
+      right: -1px;
+      width: 14px;
+      height: 14px;
+      border-top: 2px solid var(--accent);
+      border-right: 2px solid var(--accent);
+      opacity: 0;
+      transition: opacity 0.3s;
     }
 
     .stat-card:hover {
@@ -276,6 +356,8 @@
       border-color: var(--accent-mid);
       transform: translateY(-3px);
     }
+
+    .stat-card:hover::after { opacity: 1; }
 
     .stat-number {
       font-family: var(--font-display);
@@ -319,7 +401,7 @@
       left: 0;
       width: 3px;
       height: 0;
-      background: var(--accent);
+      background: linear-gradient(to bottom, var(--accent), var(--accent-2));
       transition: height 0.4s;
     }
 
@@ -357,6 +439,7 @@
     .skill-tag:hover {
       border-color: var(--accent);
       background: transparent;
+      transform: translateY(-2px);
     }
 
     /* --- EXPERIENCE --- */
@@ -378,7 +461,10 @@
       padding-left: 2.5rem;
       padding-bottom: 3rem;
       position: relative;
+      transition: transform 0.3s;
     }
+
+    .timeline-item:hover { transform: translateX(4px); }
 
     .timeline-item::before {
       content: '';
@@ -390,7 +476,10 @@
       background: var(--accent);
       border-radius: 50%;
       box-shadow: 0 0 12px var(--accent-mid);
+      transition: box-shadow 0.3s;
     }
+
+    .timeline-item:hover::before { box-shadow: 0 0 20px var(--accent); }
 
     .timeline-date {
       font-size: 0.75rem;
@@ -414,7 +503,7 @@
     }
 
     .timeline-desc {
-      font-size: 1.0rem;
+      font-size: 0.95rem;
       color: var(--text-mid);
       line-height: 1.7;
     }
@@ -430,6 +519,18 @@
       flex-direction: column;
       gap: 2rem;
       transition: border-color 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .contact-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2), transparent);
     }
 
     .contact-box:hover { border-color: var(--accent-dim); }
@@ -488,6 +589,13 @@
       letter-spacing: 1px;
     }
 
+    .footer-prompt {
+      color: var(--text-mid);
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-prompt .prompt-user { color: var(--accent); }
+
     /* --- ANIMATIONS --- */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(25px); }
@@ -503,6 +611,16 @@
     .reveal.visible {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .hero-intro, .hero h1, .hero-desc, .hero-cta, .reveal { opacity: 1; transform: none; }
     }
 
     /* --- HAMBURGER --- */
@@ -572,6 +690,7 @@
         padding: 2rem 1.5rem;
         text-align: center;
       }
+      .contact-links { justify-content: center; }
       .contact-email { font-size: 0.9rem; padding: 0.85rem 1.5rem; }
       .hero-cta { flex-direction: column; }
       .btn { text-align: center; }
@@ -590,11 +709,13 @@
 <body>
 
   <div class="glow-orb"></div>
+  <div class="glow-orb glow-orb--2"></div>
+  <div class="scroll-progress"></div>
 
   <!-- NAV -->
   <nav>
     <div class="logo">Crash<span>Sec</span></div>
-    <button class="hamburger" onclick="document.querySelector('nav').classList.toggle('open')" aria-label="Menu">
+    <button class="hamburger" aria-label="Menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
     <ul class="nav-links">
@@ -610,7 +731,7 @@
     <p class="hero-intro">// Hussein Allami — aka CrashSec</p>
     <h1>Building the<br><span class="highlight">future, securely.</span></h1>
     <p class="hero-desc">
-      Cybersecurity Engineer & Security Awareness Consultant with 10+ years of experience in information security management, penetration testing, and incident response.
+      Cybersecurity Engineer & Security Awareness Consultant with 15+ years of experience in information security management, penetration testing, and incident response.
     </p>
     <div class="hero-cta">
       <a href="#contact" class="btn btn-primary">Get in touch</a>
@@ -723,19 +844,19 @@
         </p>
       </div>
       <div class="timeline-item reveal">
-        <p class="timeline-date">2016 — 2023</p>
-        <h3 class="timeline-role">Senior Penetration Tester</h3>
-        <p class="timeline-company">Iraqi National CERT</p>
-        <p class="timeline-desc">
-          Leading offensive security assessments, conducting red team operations, and coordinating vulnerability disclosure for critical national infrastructure and government systems.
-        </p>
-      </div>
-      <div class="timeline-item reveal">
         <p class="timeline-date">2023 — Present</p>
         <h3 class="timeline-role">CERT Director</h3>
         <p class="timeline-company">Confidential</p>
         <p class="timeline-desc">
           Directing a Computer Emergency Response Team, overseeing incident response operations, threat intelligence, and security strategy for a high-security environment.
+        </p>
+      </div>
+      <div class="timeline-item reveal">
+        <p class="timeline-date">2016 — 2023</p>
+        <h3 class="timeline-role">Senior Penetration Tester</h3>
+        <p class="timeline-company">Iraqi National CERT</p>
+        <p class="timeline-desc">
+          Leading offensive security assessments, conducting red team operations, and coordinating vulnerability disclosure for critical national infrastructure and government systems.
         </p>
       </div>
       <div class="timeline-item reveal">
@@ -775,11 +896,13 @@
 
   <!-- FOOTER -->
   <footer>
+    <p class="footer-prompt"><span class="prompt-user">root@crashsec</span>:~$ echo "thanks for visiting"</p>
     <p>© 2026 Hussein Allami — CrashSec. All rights reserved.</p>
   </footer>
 
-  <!-- SCROLL REVEAL -->
+  <!-- SCRIPTS -->
   <script>
+    // Scroll reveal
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry, i) => {
         if (entry.isIntersecting) {
@@ -791,12 +914,45 @@
 
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    // Close mobile menu on link click
+    // Mobile menu
+    const nav = document.querySelector('nav');
+    const hamburger = document.querySelector('.hamburger');
+
+    hamburger.addEventListener('click', () => {
+      const open = nav.classList.toggle('open');
+      hamburger.setAttribute('aria-expanded', open);
+    });
+
     document.querySelectorAll('.nav-links a').forEach(link => {
       link.addEventListener('click', () => {
-        document.querySelector('nav').classList.remove('open');
+        nav.classList.remove('open');
+        hamburger.setAttribute('aria-expanded', 'false');
       });
     });
+
+    // Scroll progress + nav shadow
+    const progressBar = document.querySelector('.scroll-progress');
+
+    window.addEventListener('scroll', () => {
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - doc.clientHeight;
+      progressBar.style.width = (max > 0 ? (doc.scrollTop / max) * 100 : 0) + '%';
+      nav.classList.toggle('scrolled', window.scrollY > 10);
+    }, { passive: true });
+
+    // Highlight the nav link for the section in view
+    const navAnchors = document.querySelectorAll('.nav-links a');
+    const spy = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navAnchors.forEach(a =>
+            a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id)
+          );
+        }
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+
+    document.querySelectorAll('section[id]').forEach(s => spy.observe(s));
   </script>
 
 </body>
